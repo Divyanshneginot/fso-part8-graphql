@@ -1,6 +1,6 @@
 const { ApolloServer } = require("@apollo/server")
 const { startStandaloneServer } = require("@apollo/server/standalone")
-
+const { v1: uuid } = require("uuid")
 let authors = [
   {
     name: "Robert Martin",
@@ -99,13 +99,83 @@ let books = [
 
 const typeDefs = `
   type Query {
-    dummy: Int
+    bookCount: Int!
+    authorCount: Int!
+    allBooks(author: String, genre: String): [Book!]!
+    allAuthors: [Author!]!
+  }
+  type Author {
+    name: String!
+    id: ID!
+    born: Int
+    bookCount: Int!
+  },
+  type Book {
+    title: String!
+    published: Int!
+    author: String!
+    genres: [String!]!
+  }
+  type Mutation {
+    addBook(
+      title: String!
+      published: Int!
+      author: String!
+      genres: [String!]!
+    ): Book
+    editAuthor(
+      name: String!
+      setBornTo: Int!
+    ): Author
   }
 `
 
 const resolvers = {
   Query: {
-    dummy: () => 0,
+    bookCount: () => books.length,
+    authorCount: () => authors.length,
+    allBooks: (root, args) => {
+      if (args.author) {
+        return books.filter((book) => book.author === args.author)
+      }
+      if (args.genre) {
+        return books.filter((book) => book.genres.includes(args.genre))
+      }
+      return books
+    },
+    allAuthors: () => authors,
+  },
+  Author: {
+    bookCount: (root) => {
+      const authorName = root.name
+      return books.filter((book) => book.author === authorName).length
+    },
+  },
+  Book: {
+    title: (root) => root.title,
+    published: (root) => root.published,
+    author: (root) => root.author,
+    genres: (root) => root.genres,
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      const newBook = { ...args, id: uuid() }
+      const author = authors.find((a) => a.name === args.author)
+      if (!author) {
+        const newAuthor = { name: args.author, id: uuid() }
+        authors = authors.concat(newAuthor)
+      }
+      books = books.concat(newBook)
+      return newBook
+    },
+    editAuthor: (root, args) => {
+      const author = authors.find((a) => a.name === args.name)
+      if (!author) {
+        return null
+      }
+      author.born = args.setBornTo
+      return author
+    },
   },
 }
 
