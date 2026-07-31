@@ -8,9 +8,16 @@ const NewBook = ({show,setError}) => {
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       setError(error.graphQLErrors[0].message)
+    },
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks.concat(response.data.addBook),
+        }
+      })
     },
   })
   if(!show) {
@@ -39,6 +46,7 @@ const NewBook = ({show,setError}) => {
         <div>
           title
           <input
+            aria-label="title"
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
@@ -46,6 +54,7 @@ const NewBook = ({show,setError}) => {
         <div>
           author
           <input
+            aria-label="author"
             value={author}
             onChange={({ target }) => setAuthor(target.value)}
           />
@@ -53,6 +62,7 @@ const NewBook = ({show,setError}) => {
         <div>
           published
           <input
+            aria-label="published"
             type="number"
             value={published}
             onChange={({ target }) => setPublished(target.value)}
@@ -60,6 +70,7 @@ const NewBook = ({show,setError}) => {
         </div>
         <div>
           <input
+            aria-label="genre"
             value={genre}
             onChange={({ target }) => setGenre(target.value)}
           />

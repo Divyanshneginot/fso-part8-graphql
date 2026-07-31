@@ -10,6 +10,9 @@ const Authors = (props) => {
   if (!props.show) {
     return null
   }
+  if(authors.length===0){
+    return <p>No data entries</p>
+  }
   return (
     <div>
       <h2>authors</h2>
@@ -29,7 +32,9 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
-      <AuthorBirthYear authors={authors} setError={props.setError}/>
+      {props.token && (
+        <AuthorBirthYear authors={authors} setError={props.setError} />
+      )}
     </div>
   )
 }

@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { UPDATE_AUTHOR,ALL_AUTHORS } from '../queries'
 const AuthorBirthYear = ({ authors,setError }) => {
     const [name,setName]=useState(authors[0].name)
-    console.log(authors[0].name)
     const [born,setBorn]=useState('')
     const [changeBirthYear]=useMutation(UPDATE_AUTHOR,{
       refetchQueries:[{query:ALL_AUTHORS}],
@@ -21,7 +20,7 @@ const AuthorBirthYear = ({ authors,setError }) => {
       <form onSubmit={submit}>
         <div>
           name
-          <select value={name} onChange={({target})=>setName(target.value)}>
+          <select name="name" value={name} onChange={({target})=>setName(target.value)}>
             {authors.map((a) => (
               <option key={a.id}>{a.name}</option>
             ))}
@@ -29,7 +28,7 @@ const AuthorBirthYear = ({ authors,setError }) => {
         </div>
         <div>
           born
-          <input type='year' value={born} onChange={({target})=>setBorn(target.value)}/>
+          <input aria-label="born" type='year' value={born} onChange={({target})=>setBorn(target.value)}/>
         </div>
         <button type="submit">update author</button>
       </form>
